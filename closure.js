@@ -26,6 +26,9 @@
 // 2. It has access to outer function variables
 // 3. It has access to global variables
 
+//Most of the code written in front-end JS is event based. We define some behaviour and then attached to an event that is triggered by the user
+// such as button click, scroll, keypress. The code is attached as a callback(a single function that is executed in response to the event)
+
 function fizzbuzz(n) {
     for (let i = 1; i <= n; i++) {
         const isMultipleOfThree = i % 3 === 0 
@@ -89,29 +92,73 @@ for (let i=1; i<=5; i++) {
 //Here, even after the loop finished its execution, the setTimeOut function still has the reference of 'i'. This means that when the function(console.log())
 // inside setTimeOut execute after the delay, they still have access to value of i that was present at that time they were defined
 
+
+{/* <p id="help">Helpful notes will appear here</p>
+<p>Email: <input type="text" id="email" name="email" /></p>
+<p>Name: <input type="text" id="name" name="name" /></p>
+<p>Age: <input type="text" id="age" name="age" /></p> */}
+
+function showHelp(help) {
+    document.getElementById("help").textContent = help
+}
+
+function setupHelp() {
+    var helpText = [
+        { id: "email", help: "Your email address" },
+        { id: "name", help: "Your full name" },
+        { id: "age", help: "Your age (you must be over 16)" },
+    ]
+
+    for (var i = 0; i < helpText.length; i++) {
+        var item = helpText[i]
+        document.getElementById(item.id).onfocus = function () {
+        showHelp(item.help)
+        }
+    }
+} 
+setupHelp()
 const getSecret = (secret) => {
     return {
-      get: () => secret 
-    };
-  };
+        get: () => secret 
+    }
+}
   
-  test('Closure for object privacy.', assert => {
+//In the above code, we can observe closure in 3 places inside the loop. onfocus, showHelp, helpText. This code will not work. Because the item variable
+//is declared in var. Usually variables declared using var will be hoisted. So the loop will finish its execution sooner.So the last value will store
+// in the item variable i.e. "Your age (you must be over 16)". To solve this issue we can use let. let has block scope means that it creates new
+//scope for each iteration. (onfocus, showHelp, helpText ) These 3 share same lexical scope. We can use let or we can use more closures i.e. new function here 
+// ( document.getElementById(item.id).onfocus = function () {
+        // showHelp(item.help)
+    // }) 
+// and that function should return the showHelp(). This means that the new function creates different lexical scope for each iteration (callback)
+// so 'help' refers to the corresponding string from 'helpText' array
+
+//Another solution is using 'forEach' loop to iterate over helpText array and attach a listener to each <input>, like this
+
+// helpText.forEach(function (text) {
+//     document.getElementById(text.id).onfocus = function () {
+//       showHelp(text.help);
+//     };
+//   });
+
+
+test('Closure for object privacy.', assert => {
     const msg = '.get() should have access to the closure.';
     const expected = 1;
     const obj = getSecret(1);
-  
+
     const actual = obj.get();
-  
+
     try {
-      assert.ok(secret, 'This throws an error.'); 
+        assert.ok(secret, 'This throws an error.'); 
     } catch (e) {
-      assert.ok(true, `The secret var is only available
+        assert.ok(true, `The secret var is only available
         to privileged methods.`);
     }
-  
+
     assert.equal(actual, expected, msg);
     assert.end();
-  });
+});
   
 // In the above code, we can observe closure in get(). get() is exposed.
 
